@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tính lương thực nhận tháng này</title>
+<title>Take-home pay calculator</title>
 <style>
 :root{--bg:#f3f5f2;--card:#fff;--ink:#1d2b26;--muted:#5f6f68;--line:#d5ddd8;--accent:#1f6f54;--accent-ink:#fff}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141b18;--card:#1c2622;--ink:#e8efeb;--muted:#9bada5;--line:#2f3d37;--accent:#52c29a;--accent-ink:#0e1a15}}
@@ -16,7 +16,7 @@ p.sub{margin:0 0 20px;color:var(--muted)}
 label{display:block;font-weight:600;margin:0 0 6px}
 input{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);margin-bottom:16px}
 input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.A{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line);color:var(--muted)}
+.A{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);color:var(--muted)}
 .A b{color:var(--ink)}
 .result{margin-top:4px;padding:16px;border-radius:8px;background:var(--accent);color:var(--accent-ink)}
 .result small{display:block;opacity:.85}
@@ -25,44 +25,37 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 h2{font-size:1.05rem;margin:28px 0 8px}
 table{width:100%;border-collapse:collapse;font-size:.95rem}
 th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
-code{background:var(--card);border:1px solid var(--line);padding:2px 6px;border-radius:4px;font-size:.9em;word-break:break-word}
 </style>
 </head>
 <body>
 <main>
-  <h1>Tính lương thực nhận tháng này</h1>
-  <p class="sub">Nhập nợ tháng 8 và thực nhận tháng 9 để xem số tiền được trả.</p>
+  <h1>Take-home pay calculator</h1>
+  <p class="sub">Enter August's debt and September's take-home pay to see this month's payout.</p>
 
   <div class="card">
-    <label for="debt">Nợ tháng 8 ($)</label>
+    <label for="debt">August debt ($)</label>
     <input id="debt" type="number" min="0" step="0.01" inputmode="decimal" value="0">
 
-    <label for="income">Thực nhận tháng 9 ($)</label>
+    <label for="income">September take-home pay ($)</label>
     <input id="income" type="number" min="0" step="0.01" inputmode="decimal" value="0">
 
-    <div class="A"><span>A = Nợ tháng 8 + Thực nhận tháng 9</span><b id="a">$0.00</b></div>
-    <div class="A"><span>20% của A</span><b id="p">$0.00</b></div>
+    <div class="A"><span>A = August debt + September take-home</span><b id="a">$0.00</b></div>
+    <div class="A"><span>20% of A</span><b id="p">$0.00</b></div>
 
     <div class="result" aria-live="polite">
-      <small>Lương thực nhận tháng này</small>
+      <small>This month's payout</small>
       <strong id="out">$0.00</strong>
     </div>
     <p class="why" id="why"></p>
   </div>
 
-  <h2>Quy tắc</h2>
+  <h2>Rules</h2>
   <table>
-    <tr><th>Điều kiện</th><th>Trả</th></tr>
-    <tr><td>A ≤ $500</td><td>Trả hết A</td></tr>
-    <tr><td>A &gt; $500 và 20% A &lt; $500</td><td>$500</td></tr>
-    <tr><td>20% A ≥ $500</td><td>20% A</td></tr>
+    <tr><th>Condition</th><th>Payout</th></tr>
+    <tr><td>A ≤ $500</td><td>Pay all of A</td></tr>
+    <tr><td>A &gt; $500 and 20% of A &lt; $500</td><td>$500</td></tr>
+    <tr><td>20% of A ≥ $500</td><td>20% of A</td></tr>
   </table>
-
-  <h2>Công thức Excel / Google Sheets</h2>
-  <p>Với A nằm ở ô <code>C2</code>:</p>
-  <p><code>=IF(C2&lt;=500, C2, MAX(500, 0.2*C2))</code></p>
-  <p>Hoặc với nợ ở <code>A2</code>, thực nhận ở <code>B2</code>:</p>
-  <p><code>=MIN(A2+B2, MAX(500, 0.2*(A2+B2)))</code></p>
 </main>
 
 <script>
@@ -70,8 +63,8 @@ const $ = id => document.getElementById(id);
 const fmt = n => "$" + n.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
 function payout(A){
-  if (A <= 500) return A;           // trả hết A
-  return Math.max(500, 0.2 * A);    // tối thiểu $500, hoặc 20% A nếu lớn hơn
+  if (A <= 500) return A;           // pay all of A
+  return Math.max(500, 0.2 * A);    // at least $500, or 20% of A if larger
 }
 
 function update(){
@@ -82,10 +75,10 @@ function update(){
   $("p").textContent = fmt(p);
   $("out").textContent = fmt(out);
   $("why").textContent = A <= 500
-    ? "A không quá $500 nên trả hết A."
+    ? "A is $500 or less, so all of A is paid."
     : p >= 500
-      ? "20% A đạt từ $500 trở lên nên trả 20% A."
-      : "20% A dưới $500 nên trả mức tối thiểu $500.";
+      ? "20% of A is $500 or more, so 20% of A is paid."
+      : "20% of A is under $500, so the $500 minimum is paid.";
 }
 $("debt").addEventListener("input", update);
 $("income").addEventListener("input", update);
